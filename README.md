@@ -7,4 +7,4 @@ Captive Portal , Http filtering , port blocking etc with centralized
 database .
 
 
-Full and clear documentation is avialable in 
+Full and clear documentation is avialable in [Raswall Documentation](https://github.com/mohitrajain/raswall/raw/master/raswall_doc.pdf)

@@ -10,7 +10,7 @@ database .
 
 ## Specifically for Raspberry Pi .
 
-### Full and clear documentation is avialable in [Raswall Documentation](https://github.com/mohitrajain/raswall/raw/master/raswall_doc.pdf)
+### Full and clear documentation is avialable in [Raswall Documentation](https://github.com/mohitrajain/raswall/blob/master/raswall_doc.pdf)
 
 ### Todo List :
 * Automatic Installation scripts

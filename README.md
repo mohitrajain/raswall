@@ -1,14 +1,20 @@
 # RASWALL
 
-This is a network access firewall for Unix-like operating systems
-using Squid Proxy server , Clamav Antivirus , C-ICAP server , DHCP
-server , Iptables firewall , Linux utilities , nodejs , layer 7 filtering
-( iptables) , Python , mongodb , Html and Css with all the functionality
-like user management , access groups , port forwrding ( routing ) ,
-Captive Portal , Http filtering , port blocking etc with centralized
-database .
+This is a network access firewall for Unix-like operating systems using Squid Proxy server , Clamav Antivirus , C-ICAP server , DHCP server , Iptables firewall , Linux utilities , nodejs , layer 7 filtering ( iptables) , Python , mongodb , Html and Css with all the functionality like user management , access groups , port forwrding ( routing ) , Captive Portal , Http filtering , port blocking etc with centralized database .
 
-## Specifically for Raspberry Pi .
+## Features :
+* Captive Portal
+* Web & FTP Caching Proxy
+* Antivirus
+* User Access Control
+* Websites Filtering
+* DNS Server
+* DHCP Server
+* Centralised Database MongoDB
+* Port Blocking 
+* and more .
+
+### Note :- Specifically for Raspberry Pi .
 
 ### Full and clear documentation is avialable in [Raswall Documentation](https://github.com/mohitrajain/raswall/blob/master/raswall_doc.pdf)
 

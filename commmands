@@ -1,0 +1,25 @@
+# starting mongodb 
+/usr/bin/mongod -f /etc/mongod.conf 
+
+# stoping firewalld.service and starting iptables.service
+systemctl stop firewalld.service 
+systemctl start iptables.service
+
+# Deleting default rule of droping in forward table . now it will be able to forward the packets
+iptables -t filter -D FORWARD 1
+iptables -t filter -I FORWARD -j ACCEPT
+
+# Redirecting packets going to port 80 and 443 to our machine ports 3128 and 3129 respectively
+iptables -t nat -I PREROUTING -p tcp --dport 80 -i vboxnet0 -j DNAT --to-destination 10.20.48.1:3128
+iptables -t nat -I PREROUTING -p tcp --dport 443 -i vboxnet0 -j DNAT --to-destination 10.20.48.1:3129
+
+# Masquerading client's dns requests 
+iptables -t nat -I POSTROUTING -p udp --dport 53 -o wlp6s0 -j MASQUERADE
+
+# opening ports 3128 , 3129 for squid proxy server and port 10000 for our login manager.
+iptables -t filter -I INPUT -p tcp --dport 10000 -j ACCEPT  
+iptables -t filter -I INPUT -p tcp --dport 3128 -j ACCEPT 
+iptables -t filter -I INPUT -p tcp --dport 3129 -j ACCEPT
+
+# using selinux in permissive mode
+setenforce 0

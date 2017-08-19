@@ -1,0 +1,209 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Panel </title>
+
+    <link rel="shortcut icon" href="../favicon.ico">
+    <link rel="stylesheet" type="text/css" href="materialize/css/materialize.min.css" />
+    <link rel="stylesheet" type="text/css" href="font-awesome/css/font-awesome.min.css" />
+    <script src="jquery.js"></script>
+    <script src="materialize/js/materialize.min.js"></script>
+
+</head>
+<body>
+
+<div class="row">
+    <div class="col s3" style="box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14),0 1px 5px 0 rgba(0,0,0,0.12),0 3px 1px -2px rgba(0,0,0,0.2);">
+        <p > System Configuration </p>
+    </div>
+    <div class="col s9" style="box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14),0 1px 5px 0 rgba(0,0,0,0.12),0 3px 1px -2px rgba(0,0,0,0.2);">
+        <p> Hatt BC </p>
+
+        <div id="activeSession">
+            <table class="highlight" id="activeSessionTable">
+            </table>
+        </div>
+
+    </div>
+</div>
+
+<label id="active_session" style="display: none">{sessions}</label>
+<label id="alert" style="display: none">{alert}</label>
+
+
+<tagOfNoUse>
+
+    <script>
+        $(document).ready(function(){
+            var as =  $.get("/getActiveSessions");
+        });
+
+        if(document.getElementById("alert").innerHTML!="{alert}"){
+            console.log("in alert");
+            alert(document.getElementById("alert").innerHTML);
+        }else{
+            var active_session = document.getElementById("active_session").innerHTML;
+            //var obj = JSON.stringify(active_session);
+            console.log(active_session);
+            var json = JSON.parse(active_session);
+
+
+            console.log(json.length);
+            console.log(json[0]["ip"]);
+
+            var len = json.length;
+            var jsonSize = Object.keys(json[0]).length;
+
+            make_table();
+
+        }
+
+
+
+        $('#drop_session').click(function(){
+            $.get("/dropSession?"+$(this).val());
+        });
+        function make_table(){
+
+            var row = document.createElement('tr');
+            document.getElementById("activeSessionTable").appendChild(row);
+
+            for(var j in json[0]){
+
+                if(j!="_id" && j!="__v"){
+                    var col = document.createElement('td');
+                    col.textContent = j;
+                    row.appendChild(col);
+                }
+            }
+            var col = document.createElement('td');
+            col.textContent = " ";
+            row.appendChild(col);
+
+
+            for( var i=0; i< len ; i++){
+
+                var rows = document.createElement('tr');
+                document.getElementById("activeSessionTable").appendChild(rows);
+
+                for(var j in json[i]){
+                    if(j!="_id" && j!="__v"){
+                        var cols = document.createElement('td');
+                        cols.textContent = json[i][j] ;
+                        rows.appendChild(cols);
+                    }
+                }
+                var btn = document.createElement('button');
+                btn.textContent ="Drop Session";
+                btn.setAttribute('id',"drop_session");
+                btn.setAttribute('value',json[i]["_id"]);
+                rows.appendChild(btn);
+            }
+        }
+
+    </script>
+
+
+
+    <div>
+        <button id="add_users" onclick="add_Users()" style="display: block">Add Users</button>
+
+        <div id="add_users_div" style="display: none;">
+            <form action="/addUser" method = "post">
+                Username: <input type="text" name="username" placeholder="Username" /><br>
+                Password: <input type="password" name="password" placeholder="Password" /><br>
+                Category: <input type="text" name="category" placeholder="Category of Student"/><br>
+                <button type="submit">Submit</button><br>
+            </form>
+            <label id="add_user" style="display: none">{add_user}</label>
+        </div>
+    </div>
+
+
+
+    <div>
+        <button id="add_weblists" onclick="add_Weblists()" style="display: block">Add Weblists</button>
+
+        <div id="add_weblists_div" style="display: none;">
+            <form action="/addWeblist" method = "post">
+                List name: <input type="text" name="listName" placeholder="Name of List"/><br>
+                Blacklist: <input type="text" name="blackList" placeholder="Blacklist String"/><br>
+                <button type="submit">Submit</button><br>
+            </form>
+            <label id="add_weblist" style="display: none">{add_weblist}</label>
+        </div>
+    </div>
+
+
+    <div>
+        <button id="add_categories" onclick="add_Category()" style="display: block">Add Category</button>
+
+        <div id="add_category_div" style="display: none;">
+
+            <form action="/addCategory" method = "post">
+                Category Name : <input type="text" name="catgName" placeholder=" Name of Category "/><br>
+                Maximum time : <input type="number" name="maxTime" placeholder=" Maximum time allowed "/><br>
+                Enrolled List : <input type="text" name="enrolledList" placeholder=" List of Websites "/><br>
+                <button type="submit">Submit</button><br>
+            </form>
+            <label id="add_category" style="display: none">{add_category}</label>
+        </div>
+    </div>
+
+    <div class="table-users">
+
+        <a id="active_sessions" href="/getActiveSessions" target="_blank">Get Active Sessions</a>
+
+
+    </div>
+
+
+
+    <tagOfNoUse>
+
+        <script type="text/javascript">
+
+
+            function add_Users(){
+                document.getElementById("add_users").style.display='none';
+                document.getElementById("add_users_div").style.display= 'block';
+
+            }
+
+            function add_Weblists(){
+                document.getElementById("add_weblists").style.display='none';
+                document.getElementById("add_weblists_div").style.display= 'block';
+            }
+
+            function add_Category(){
+                document.getElementById("add_categories").style.display='none';
+                document.getElementById("add_category_div").style.display= 'block';
+            }
+
+            var user = document.getElementById("add_user").innerHTML;
+            if(user!= "{add_user}"){
+                alert(user);
+                document.getElementById("add_user").innerHTML = "{add_user}";
+            }
+
+            var weblist = document.getElementById("add_weblist").innerHTML;
+            if(weblist!= "{add_weblist}"){
+                alert(weblist);
+                document.getElementById("add_weblist").innerHTML = "{add_weblist}";
+            }
+
+            var category = document.getElementById("add_category").innerHTML;
+            if(category!= "{add_category}"){
+                alert(category);
+                document.getElementById("add_category").innerHTML = "{add_category}";
+            }
+
+
+
+
+        </script>
+
+</body>
+
+</html>

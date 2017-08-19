@@ -1,0 +1,16 @@
+#!/bin/bash
+# Start
+# Configure IP address for WLAN
+nmcli networking off
+rfkill unblock wifi
+echo 'setting wlan0 address'
+ifconfig wlan0 192.168.150.1 netmask 255.255.255.0 up
+# Start DHCP/DNS server
+echo 'starting dhcp server'
+systemctl restart isc-dhcp-server.service
+echo 'dhcp started'
+iptables --flush
+iptables -t nat -I PREROUTING -p tcp --dport 80 -j DNAT --to-destination 192.168.150.1:3000
+
+#echo 'hostapd starting'
+

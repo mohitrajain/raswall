@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Squid ACL</title>
+</head>
+<body>
+
+	<p>
+		acl <input type="text" name="acl">&nbsp;&nbsp;
+		<select id="" value=" " name="">
+			<option>localip</option>
+			<option>src</option>
+			<option>dstdomain</option>
+			<option>port</option>
+			<option></option>
+
+		</select>&nbsp;&nbsp;
+		<input type="text" name="">
+	</p>
+	<button id="" onclick="add()">Add</button>
+
+<script type="text/javascript">
+
+	function add(){
+		var par = document.createElement('p');
+		par.textContent= 'acl ';
+		document.body.appendChild(par);
+		
+		var input = document.createElement('input');
+		input.setAttribute('type','text');
+		input.setAttribute('name','acl');
+		par.appendChild(input);
+	}
+	
+</script>
+</body>
+</html>

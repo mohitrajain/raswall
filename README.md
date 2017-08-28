@@ -27,3 +27,4 @@ This is a network access firewall for Unix-like operating systems using Squid Pr
 * DHCP server with mac spoofing prevention using p0f etc
 * Tunnelling prevention for ICMP
 * Prevention against malformed packets
+* IPv6 support and filtering

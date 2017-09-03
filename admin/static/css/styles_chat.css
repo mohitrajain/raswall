@@ -1,0 +1,33 @@
+button {
+	 width: 450px;
+}
+.online{
+    background-color:aquamarine;
+}
+.offline{
+    background-color:beige;
+}
+button:active{
+    background-color: aliceblue;
+}
+.online:hover{
+    background-color: aqua;
+}
+.offline:hover{
+    background-color: bisque;
+}
+.fp{
+    background-color: lightpink;
+    text-align: right;
+    padding: 10px;
+}
+.sp{
+    background-color: gold;
+    text-align: left;
+    padding: 10px;
+}
+
+.arrived{
+    text-decoration-color: chartreuse;
+}
+

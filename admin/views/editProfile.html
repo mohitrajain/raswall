@@ -1,0 +1,78 @@
+<!doctype html>
+<html ng-app="editProfile">
+<head>
+    <title><%= username %> Profile</title>
+    <link rel="stylesheet" type="text/css"
+          href="/static/css/styles.css" />
+</head>
+
+<body ng-controller="maincontroller">
+
+<div class="form-container">
+
+    <p class="form-header">Edit Profile</p>
+
+    <form method="POST" action="/editProfile">
+
+        <label>Username  </label>
+        <input type="text" name="username"  ng-model="username" disabled><br>
+
+
+
+        <h3>* Change Password to change it or leave it</h3>
+
+        <label>New Password  </label>
+        <input type="password" name="password" ng-model="password1"><br>
+        <div ng-if="(password1.length < 8)" >
+            <h3>* Password Length should be Atleast 8</h3>
+        </div>
+
+        <label>Confirm Password  </label>
+        <input type="password" name="password2" ng-model="password2" ng-show="(value === 1 )" disabled><br>
+
+        <input type="password" name="password2" ng-model="password2" ng-show="(value > 1 )" ><br>
+        <div ng-if="(password1 !== password2)" >
+            <h3>* Password must be Same</h3>
+        </div>
+
+        <input type="hidden" name="value"  ng-value="value">
+
+        <a href="/home">Cancel</a>
+
+        <input type="submit" value="Save"  ng-show="(password1.length >= 0 && password1 == password2 )" >
+
+        <input type="submit" value="Save"  ng-hide="(password1.length >= 0 && password1 == password2 )" disabled>
+
+        <div> <a href="/deleteUser">Delete User Account</a>
+        </div>
+
+    </form>
+
+</div>
+<hr>
+
+<h2><%= msg %></h2>
+
+<script src="/static/js/jquery.min.js"></script>
+<script src="/static/js/angular.min.js"></script>
+<script >
+    var myapp = angular.module('editProfile',[]);
+
+    myapp.controller('maincontroller',['$scope',function ($scope) {
+
+        $scope.username = '<%= username %>' ;
+        $scope.password1 ='password';
+        $scope.password2 = 'password';
+
+        $scope.value = 0;
+
+        $scope.$watch('password1', function() {
+            $scope.value++;
+                    });
+
+
+    }]);
+
+</script>
+</body>
+</html>

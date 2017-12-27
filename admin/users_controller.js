@@ -8,7 +8,7 @@ function hashPW(pwd){
     digest('base64').toString();
 }
 
-var admins = require('../db').admins;
+var admins = require('./users_model').admins;
 var users = require('../db').users;
 var weblist = require('../db').WebLists;
 var category = require('../db').categories;
@@ -127,30 +127,30 @@ exports.signup = function (req,res) {
     
 exports.editProfile= function (req,res) {
     
-                        if(req.session.name) {
+    if(req.session.name) {
                             
-                            admins.findOne({username:req.session.name})
-                                .exec(function (err,doc) {
+        admins.findOne({username:req.session.name})
+            .exec(function (err,doc) {
                             
-                                    if(err || !doc){
-                                        req.session.msg = 'Database Connectivity Error';
-                                        res.redirect('/home');
-                                    console.log('Error occured while getting user profile  ' + err);   
-                                    }
+                if(err || !doc){
+                    req.session.msg = 'Database Connectivity Error';
+                    res.redirect('/home');
+                    console.log('Error occured while getting user profile  ' + err);
+                }
                                     
-                                    else {
-                                        req.session.msg1 = req.session.msg1 || '* Change the Field You Want';
+                else {
+                    req.session.msg1 = req.session.msg1 || '* Change the Field You Want';
 
-                                        res.render('editProfile', {username: req.session.name,msg: req.session.msg1});
-                                    }
+                    res.render('editProfile', {username: req.session.name,msg: req.session.msg1});
+                }
                             
-                                    });
-                        }
-                        else{
-                            req.session.msg = 'Login Please ';
-                            res.redirect('/login'); //passing msg to the login 
-                        }
-                    };
+            });
+    }
+    else{
+        req.session.msg = 'Login Please ';
+        res.redirect('/login'); //passing msg to the login
+    }
+};
 
 exports.saveProfile = function (req,res) {
     
@@ -193,6 +193,8 @@ exports.saveProfile = function (req,res) {
 
 };
 
+/**************************************************** User Panel starts ***************************************************/
+
 exports.deleteUser = function (req,res) {
     console.log("delete user: "+req.query.user);
 
@@ -220,14 +222,6 @@ exports.getUsers = function (req,res) {
                 console.log(" users found ");
                 var obj = data;
 
-               /* category.find({},{catgName:1,_id:0},function (err,doc) {
-                    if(err){
-                        console.log("DB Error in finding categories");
-                        res.status(200).send("DB Error in finding categories");
-                    }else{
-
-                    }
-                });*/
                 console.log(JSON.stringify(data));
                 res.status(200).send(JSON.stringify(data));
             }else{
@@ -264,80 +258,50 @@ exports.saveUser = function (req,res) {
     });
 };
 
+exports.getDistinctCategories = function (req,res) {
+    category.find().distinct('catgName',function (err,doc) {
+       if (err)
+           console.log(err);
+       else{
+           console.log(doc);
+           res.status(200).send(doc);
+       }
+    });
+}
 
 exports.addUser = function(req,res){
-    console.log(" add user: "+req.body.username+ ' Category: '+req.body.category);
+    console.log(" add user: "+req.body.username+ "pass: "+req.body.password+' Category: '+req.body.category);
 
-    users.find({category: req.body.category}, function (err, data) {
+
+    var user= new users({
+        username: req.body.username,
+        password: req.body.password,
+        ctTime : new Date(),
+        category: req.body.category
+    });
+
+    user.save(function (err, data) {
         if(err){
+            var msg= " error in saving new user to db: "
 
-            var msg1 = " Database error ";
-            console.log(msg1+err);
-            var homeHTMLCopy = homeHTML;
+            if(err.code==11000){
+                msg= " Duplicate entry error";
+            }
 
-            //split html in two parts first one having string to be replaced AND LOWER part is added to complete the page
-
-            homeHTMLCopy =   homeHTMLCopy.split('<tagOfNoUse>')[0].replace('{add_user}',msg1) + homeHTMLCopy.split('<tagOfNoUse>')[1]  ;
-            res.writeHead(200,{'Content-Type': 'text/html'});
-            res.end(homeHTMLCopy);
+            console.log(msg+err);
 
         }else{
-            if(data.length>0){
-                console.log("category: "+data.category);
-
-
-                var user= new users({
-                    username: req.body.username,
-                    password: req.body.password,
-                    category: req.body.category,
-                    ctTime : new Date(),
-                });
-
-                user.save(function (err, data) {
-                    if(err){
-                        var msg= " error in saving new user to db: "
-
-                        if(err.code==11000){
-                            msg= " Duplicate entry error";
-                        }
-
-                        console.log(msg+err);
-                        var homeHTMLCopy = homeHTML;
-
-                        //split html in two parts first one having string to be replaced AND LOWER part is added to complete the page
-
-                        homeHTMLCopy =   homeHTMLCopy.split('<tagOfNoUse>')[0].replace('{add_user}',msg) + homeHTMLCopy.split('<tagOfNoUse>')[1]  ;
-                        res.writeHead(200,{'Content-Type': 'text/html'});
-                        res.end(homeHTMLCopy);
-
-                    }else{
-                        var msg= " new user is successfully saved ";
-                        console.log(msg);
-                        var homeHTMLCopy = homeHTML;
-
-                        //split html in two parts first one having string to be replaced AND LOWER part is added to complete the page
-
-                        homeHTMLCopy =   homeHTMLCopy.split('<tagOfNoUse>')[0].replace('{add_user}',msg) + homeHTMLCopy.split('<tagOfNoUse>')[1]  ;
-                        res.writeHead(200,{'Content-Type': 'text/html'});
-                        res.end(homeHTMLCopy);
-
-                    }
-                });
-            }else{
-                var msg2 = "category not found";
-                console.log(msg2);
-                var homeHTMLCopy = homeHTML;
-
-                //split html in two parts first one having string to be replaced AND LOWER part is added to complete the page
-
-                homeHTMLCopy =   homeHTMLCopy.split('<tagOfNoUse>')[0].replace('{add_user}',msg2) + homeHTMLCopy.split('<tagOfNoUse>')[1]  ;
-                res.writeHead(200,{'Content-Type': 'text/html'});
-                res.end(homeHTMLCopy);
-            }
+            var msg= " new user is successfully saved ";
         }
+
+        res.status(200).send(msg);
     });
 };
 
+/**************************************************** User Panel ends ***************************************************/
+
+
+/**************************************************** Weblists Panel starts ***************************************************/
 
 
 exports.addWeblist = function(req,res){
@@ -345,7 +309,7 @@ exports.addWeblist = function(req,res){
 
     var list= new weblist({
         listName: req.body.listName,
-        blackList: req.body.blackList
+        blackList: req.body.blackList.split(',')
     });
 
     list.save(function (err,data) {
@@ -358,101 +322,189 @@ exports.addWeblist = function(req,res){
 
            console.log(msg+err);
 
-           var homeHTMLCopy = homeHTML;
-
-           //split html in two parts first one having string to be replaced AND LOWER part is added to complete the page
-
-           homeHTMLCopy =   homeHTMLCopy.split('<tagOfNoUse>')[0].replace('{add_weblist}',msg) + homeHTMLCopy.split('<tagOfNoUse>')[1]  ;
-           res.writeHead(200,{'Content-Type': 'text/html'});
-           res.end(homeHTMLCopy);
+           res.status(200).send(msg);
 
        }else{
            var msg= " new weblist is successfully saved ";
            console.log(msg);
-           var homeHTMLCopy = homeHTML;
 
-           //split html in two parts first one having string to be replaced AND LOWER part is added to complete the page
-
-           homeHTMLCopy =   homeHTMLCopy.split('<tagOfNoUse>')[0].replace('{add_weblist}',msg) + homeHTMLCopy.split('<tagOfNoUse>')[1]  ;
-           res.writeHead(200,{'Content-Type': 'text/html'});
-           res.end(homeHTMLCopy);
+           res.status(200).send(msg);
        }
     });
 };
 
 
-exports.addCategory = function(req,res){
-    console.log(" add category: "+req.body.catgName+ ' maxTime: '+req.body.maxTime+' EnrolledList: '+req.body.enrolledList);
-
-    weblist.find({listName: req.body.catgName}, function (err, data) {
+exports.getWeblists = function (req,res) {
+    weblist.find(function (err,data) {
         if(err){
-            var msg1 = " Database error ";
-            console.log(msg1+err);
-            var homeHTMLCopy = homeHTML;
-
-            //split html in two parts first one having string to be replaced AND LOWER part is added to complete the page
-
-            homeHTMLCopy =   homeHTMLCopy.split('<tagOfNoUse>')[0].replace('{add_category}',msg1) + homeHTMLCopy.split('<tagOfNoUse>')[1]  ;
-            res.writeHead(200,{'Content-Type': 'text/html'});
-            res.end(homeHTMLCopy);
-
+            var msg = " DB Error in finding Weblists ";
+            console.log(msg);
+            res.status(200).send(msg);
         }else{
-            if(data.length>0){
-                console.log("ListName: "+data.listName);
+            if(data.length > 0){
+                console.log(" Weblists found ");
+                var obj = data;
 
-                console.log(" BlackList: "+req.body.blackList.length);
-
-                var enrolledlist = req.body.enrolledList.split(",");
-
-                var catg= new category({
-                    catgName: req.body.catgName,
-                    maxTime: req.body.maxTime,
-                    enrolledList : req.body.enrolledList
-                });
-
-                user.save(function (err, data) {
-                    if(err){
-                        var msg= " error in saving new category to db: "
-
-                        if(err.code==11000){
-                            msg= " Duplicate entry error";
-                        }
-
-                        console.log(msg+err);
-                        var homeHTMLCopy = homeHTML;
-
-                        //split html in two parts first one having string to be replaced AND LOWER part is added to complete the page
-
-                        homeHTMLCopy =   homeHTMLCopy.split('<tagOfNoUse>')[0].replace('{add_category}',msg) + homeHTMLCopy.split('<tagOfNoUse>')[1]  ;
-                        res.writeHead(200,{'Content-Type': 'text/html'});
-                        res.end(homeHTMLCopy);
-                    }else{
-                        var msg= " new category is successfully saved ";
-                        console.log(msg);
-                        var homeHTMLCopy = homeHTML;
-
-                        //split html in two parts first one having string to be replaced AND LOWER part is added to complete the page
-
-                        homeHTMLCopy =   homeHTMLCopy.split('<tagOfNoUse>')[0].replace('{add_category}',msg) + homeHTMLCopy.split('<tagOfNoUse>')[1]  ;
-                        res.writeHead(200,{'Content-Type': 'text/html'});
-                        res.end(homeHTMLCopy);
-
-                    }
-                });
+                console.log(JSON.stringify(data));
+                res.status(200).send(JSON.stringify(data));
             }else{
-                var msg2 = "category not found in weblist";
-                console.log(msg2);
-                var homeHTMLCopy = homeHTML;
-
-                //split html in two parts first one having string to be replaced AND LOWER part is added to complete the page
-
-                homeHTMLCopy =   homeHTMLCopy.split('<tagOfNoUse>')[0].replace('{add_category}',msg2) + homeHTMLCopy.split('<tagOfNoUse>')[1]  ;
-                res.writeHead(200,{'Content-Type': 'text/html'});
-                res.end(homeHTMLCopy);
+                var msg = " NO WEBLISTS ";
+                console.log(msg);
+                res.status(200).send(msg);
             }
         }
     });
 };
+
+
+
+exports.saveWeblists = function (req,res) {
+    console.log("save weblists"+req.query.listName);
+
+    weblist.update({_id: req.query.id},{ $set :  { listName: req.query.listName, blackList: req.query.blackList.split(',') } }, function (err,data) {
+        if(err){
+            var msg = "DB Error";
+            res.status(200).send(msg);
+        }else{
+            console.log("updated: ");
+
+            weblist.find(function (err,doc) {
+                if(err){
+                    var msg = "Weblists details updated but error in displaying";
+                    res.status(200).send(msg);
+                }
+                else{
+                    console.log("new: "+doc);
+                    res.status(200).send(JSON.stringify(doc));
+                }
+            })
+        }
+    });
+};
+
+exports.deleteWeblists = function (req,res) {
+    console.log("delete weblists: "+req.query.listName);
+
+    weblist.deleteOne({_id: req.query.listName},function (err) {
+        if(err){
+            console.log(" Error in deleting weblists ");
+            res.status(200).send(" Error in deleting Weblists ");
+        }else{
+            res.status(200).send();
+        }
+    })
+
+};
+
+/**************************************************** Weblists Panel ends ***************************************************/
+
+/**************************************************** Category Panel start ***************************************************/
+
+exports.getDistinctWebLists = function (req,res) {
+    weblist.find().distinct('listName',function (err,doc) {
+        if (err)
+            console.log(err);
+        else{
+            console.log(doc);
+            res.status(200).send(doc);
+        }
+    });
+};
+
+exports.addCategory = function(req,res){
+    console.log(" add category: "+req.body.category+ ' maxTime: '+req.body.maxTime+' EnrolledList: '+req.body.enrolledLists);
+
+   var catg = new category({
+       catgName : req.body.category,
+       maxTime : req.body.maxTime,
+       enrolledLists : req.body.enrolledLists
+   });
+
+   catg.save(function (err,data) {
+       if(err){
+           var msg= " error in saving new category to db: ";
+
+           if(err.code==11000){
+               msg= " Duplicate entry error";
+           }
+
+           console.log(msg+err);
+
+       }else{
+           var msg= " new category is successfully saved ";
+       }
+
+       res.status(200).send(msg);
+   });
+};
+
+
+exports.deleteCategory = function (req,res) {
+    console.log("delete category: "+req.query.category);
+
+    category.deleteOne({_id: req.query.category},function (err) {
+        if(err){
+            console.log(" Error in deleting category ");
+            res.status(200).send(" Error in deleting category ");
+        }else{
+            res.status(200).send();
+        }
+    })
+
+};
+
+
+exports.saveCategory = function (req,res) {
+    console.log("save category"+req.query.catgName+"enrolledList: "+req.query.enrolledLists);
+
+    console.log(typeof(req.query.enrolledLists));
+    category.update({_id: req.query.id},{ $set :  { catgName: req.query.catgName, maxTime: req.query.maxTime, enrolledLists: req.query.enrolledLists } }, function (err,data) {
+        if(err){
+            var msg = "DB Error";
+            res.status(200).send(msg);
+        }else{
+            console.log("updated: ");
+
+            category.find(function (err,doc) {
+                if(err){
+                    var msg = "Category details updated but error in displaying";
+                    res.status(200).send(msg);
+                }
+                else{
+                    console.log("new: "+doc);
+                    res.status(200).send(JSON.stringify(doc));
+                }
+            })
+        }
+    });
+};
+
+
+exports.getCategories = function (req,res) {
+    console.log(" Show Categories ");
+
+    category.find(function (err,data) {
+        if(err){
+            var msg = " DB Error in finding Categories ";
+            console.log(msg);
+            res.status(200).send(msg);
+        }else{
+            if(data.length > 0){
+                console.log(" Categories found ");
+                var obj = data;
+
+                console.log(JSON.stringify(data));
+                res.status(200).send(JSON.stringify(data));
+            }else{
+                var msg = " NO CATEGORIES ";
+                console.log(msg);
+                res.status(200).send(msg);
+            }
+        }
+    });
+};
+
+/**************************************************** Category Panel ends ***************************************************/
 
 exports.getActiveSessions = function (req,res) {
 
@@ -497,3 +549,7 @@ function findSession(res) {
 
     });
 }
+
+
+
+

@@ -1,16 +1,33 @@
-#!/bin/bash
-# Start
-# Configure IP address for WLAN
-nmcli networking off
-rfkill unblock wifi
-echo 'setting wlan0 address'
-ifconfig wlan0 192.168.150.1 netmask 255.255.255.0 up
-# Start DHCP/DNS server
-echo 'starting dhcp server'
-systemctl restart isc-dhcp-server.service
-echo 'dhcp started'
-iptables --flush
-iptables -t nat -I PREROUTING -p tcp --dport 80 -j DNAT --to-destination 192.168.150.1:3000
+ifconfig enp7s0 10.10.13.159 netmask 255.255.252.0 up # initialising our enp7s0 (ethernet) interface 
+route add default gw 10.10.13.1 # setting route for default gateway for enp7s0
+echo 'nameserver 8.8.8.8' > /etc/resolv.conf  # initialising dns nameserver for our pc 
+ifconfig wlp6s0 10.20.48.1 netmask 255.255.255.0 up # initialising our wlp6s0 ( wireless ) interface
+systemctl restart hostapd.service # starting hostapd (access point daemon ) for wlp6s0
+systemctl restart dhcpd.service # starting dhcp server on wlp6s0 interface
 
-#echo 'hostapd starting'
+systemctl restart iptables.service # starting iptables service and stopping other firewall service 
 
+echo 1 > /proc/sys/net/ipv4/ip_forward # enabling forwarding in netfilter
+
+iptables --flush # erasing all preconfigured rules 
+
+iptables -t filter -I FORWARD 1 -i wlp6s0 -s 10.20.48.0/22 -o enp7s0 -j ACCEPT # for forwarding of packets
+iptables -t filter -I FORWARD 1 -i enp7s0 -d 10.20.48.0/22 -o wlp6s0 -j ACCEPT
+
+iptables -t nat -I POSTROUTING 1 -o wlp6s0 -s 10.20.48.0/22 -j MASQUERADE  # masquerading traffic coming out from wlp6s0 for redirecting purpose
+
+iptables -t nat -I PREROUTING 1 -p tcp --dport 80 -i wlp6s0 -s 10.20.48.0/22 -j DNAT --to 10.20.48.1:8000 # redirecting every packet for redirection to http server
+iptables -t filter -I INPUT 1 -p tcp --dport 8000 -s 10.20.48.0/22  -i wlp6s0 -j ACCEPT # Allowing input traffic to our redirection server
+
+iptables -t nat -I PREROUTING 1 -p tcp --dport 443 -i wlp6s0 -s 10.20.48.0/22 -j DNAT --to 10.20.48.1:4430 # redirecting every packet for redirection to https server
+iptables -t filter -I INPUT 1 -p tcp --dport 4430 -s 10.20.48.0/22  -i wlp6s0 -j ACCEPT # Allowing input traffic to our redirection https server
+
+iptables -t filter -I INPUT 1 -p tcp --dport 1000 -s 10.20.48.0/22 -i enp7s0 -j ACCEPT # Allowing traffic to our Authentication web server
+
+iptables -t nat -I POSTROUTING -o enp7s0 -j MASQUERADE  # as we don't have public ip address so we will be masquerading our traffic to internet
+
+iptables -t nat -A INPUT -i enp7s0 -j DROP # for firewall safety blocking all incoming packets 
+
+# python main.py  # starting http redirector
+# python main_https.py # starting https redirector
+# python login_manager.py # starting authenticator web server 

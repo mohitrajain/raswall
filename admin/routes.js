@@ -64,16 +64,30 @@ module.exports = function (app) {
     
   });
 
-app.get('/home',users.home);  
-app.post('/login',users.login);
-app.post('/signup',users.signup);  
-app.get('/editProfile',users.editProfile);
-app.post('/editProfile',users.saveProfile);
-app.get('/deleteUser',users.deleteUser);
-app.post('/addUser',users.addUser);
+app.get('/home', users.home);
+app.post('/login',  users.login);
+app.post('/signup', users.signup);
+app.get('/editProfile', users.editProfile);
+app.post('/editProfile', users.saveProfile);
+
+app.get('/deleteUser', users.deleteUser);
+app.post('/addUser', users.addUser);
 app.get('/getUsers', users.getUsers);
 app.get('/saveUser', users.saveUser);
-app.post('/addWeblist',users.addWeblist);
+app.get('/getDistinctCategories', users.getDistinctCategories);
+
+app.post('/addWeblist', users.addWeblist);
+app.get('/getWeblists', users.getWeblists);
+app.get('/deleteWeblists', users.deleteWeblists);
+app.get('/saveWeblists', users.saveWeblists);
+
 app.post('/addCategory', users.addCategory);
+app.get('/getDistinctWebLists', users.getDistinctWebLists);
+app.get('/getCategories', users.getCategories);
+app.get('/saveCategory', users.saveCategory);
+app.get('/deleteCategory', users.deleteCategory);
+
 app.get('/getActiveSessions', users.getActiveSessions);
+
+
 };

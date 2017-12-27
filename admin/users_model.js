@@ -1,4 +1,5 @@
 var mongoose = require('mongoose');
+mongoose.connect('mongodb://127.0.0.1/raswall',{ useMongoClient: true });
 var Schema = mongoose.Schema;
 
 var adminSchema = new Schema({
@@ -7,8 +8,5 @@ var adminSchema = new Schema({
     hashpasswd:String
 });
 
-
-
-
-mongoose.model('userCollection',userSchema);
+module.exports.admins = mongoose.model('admins',adminSchema);
 

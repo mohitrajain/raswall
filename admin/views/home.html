@@ -7,8 +7,10 @@
     <link rel="shortcut icon" href="../favicon.ico">
     <link rel="stylesheet" type="text/css" href="materialize/css/materialize.min.css" />
     <link rel="stylesheet" type="text/css" href="font-awesome/css/font-awesome.min.css" />
+
     <script src="jquery.js"></script>
     <script src="materialize/js/materialize.min.js"></script>
+
 
 </head>
 <body>
@@ -38,13 +40,12 @@
     </div>
     <div class="col s9" style="overflow-y: auto; box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14),0 1px 5px 0 rgba(0,0,0,0.12),0 3px 1px -2px rgba(0,0,0,0.2);">
 
-        <div id="division">
+
             <table class="highlight centered bordered" id="Table">
 
             </table>
-        </div>
-
     </div>
+
 </div>
 
 <div class="floating-button" style="position: fixed; bottom: 20px; margin-left: calc(50% - 10px);">
@@ -53,338 +54,88 @@
 </div>
 
 
-<!-- Modal Structure -->
-<div id="modal1" class="modal bottom-sheet">
+<!-- Add User Form Structure -->
+<div id="addUser" class="modal bottom-sheet">
 
-    <div class="modal-content row">
+
+    <form class="modal-content row" id="addUserForm">
 
             <div class="input-field col s4">
-                <input id="username_addModal" type="text" name="username" class="validate">
-                <label for="username_addModal">Username</label>
+                <input id="username_addUser" type="text" name="username" class="validate">
+                <label for="username_addUser">Username</label>
             </div>
             <div class="input-field col s4">
-                <input id="password_addModal" type="password" name="password" class="validate">
-                <label for="password_addModal">Password</label>
+                <input id="password_addUser" type="password" name="password" class="validate">
+                <label for="password_addUser">Password</label>
             </div>
             <div class="input-field col s4">
-                <input id="category_addModal" type="text" name="category" class="validate">
-                <label for="category_addModal">Category</label>
+                <select  id="category_addUser" name="category">
+
+                </select>
+                <label >Category</label>
             </div>
+
+    </form>
 
     <div class="modal-footer">
-        <input type="submit" class="modal-action modal-close waves-effect waves-green btn-flat" value="Add User"></div>
+        <input type="submit" class="modal-action modal-close waves-effect waves-green btn-flat" value="Add User" onclick="AddUser_btn_click()">
     </div>
 </div>
 
-<script>
+<!-- Add Category Structure -->
+<div id="addCategory" class="modal bottom-sheet">
 
-var globalObj;
+    <form class="modal-content row" id="addCategoryForm">
 
-    function showAddModal(){
-        $('#modal1').modal('open');
-    }
+        <div class="input-field col s4">
+            <input id="catgName" type="text" name="category" class="validate">
+            <label for="catgName">Category</label>
+        </div>
+        <div class="input-field col s4">
+            <input id="maxTime_addcategory" type="number" name="maxTime" class="validate">
+            <label for="maxTime_addcategory">Max Time allowed</label>
+        </div>
+        <div class="input-field col s4">
+            <select  id="enrolledLists_addcategory" name="enrolledLists" multiple>
 
-    $(document).ready(function(){
-        $('#main_row').attr('style','height:'+(window.innerHeight-106)+'px;overflow-y: auto;');
-    });
+            </select>
+            <label >Enrolled Lists</label>
+        </div>
 
-    $(document).ready(function(){
-        // the "href" attribute of the modal trigger must specify the modal ID that wants to be triggered
-        $('.modal').modal();
-    });
+    </form>
 
-    function show_authSessions(){
-        $.get("/getActiveSessions",function(data){
-            if(data == " DB Error in finding all the Sessions "){
-                alert(data);
-            }
-            else if(data == " No active Sessions "){
-                alert(data);
-            }
-            else if(data == " DB error in deleting "){
-                alert(data);
-            }
-            else{
-                console.log('here ' + data);
-                make_authSessionTable(data);
-            }
-            $('.drop_session').click(function(){
-                $.get("/getActiveSessions?drop="+$(this).attr('value'),function (doc) {
-                    if(doc == " Error in finding all the Sessions "){
-                        $("#Table").html("");
-                        alert(doc);
-                    }
-                    else if(doc == " DB error "){
-                        alert(doc);
-                    }
-                    else if(doc == " No active Sessions "){
-                        $("#Table").html("");
-                        alert(doc);
-                    }
-                    else{
-                        $("#Table").html("");
-                        make_authSessionTable(doc);
-                    }
-                });
-            });
-        });
-
-    }
-
-    $('#division').ready(function(){
-            show_authSessions();
-    });
-
-    $("#authSessions").click(function () {
-        $("#Table").empty();
-        show_authSessions();
-    });
-
-    function make_authSessionTable(data){
-
-        var obj = JSON.stringify(data);
-        console.log(data);
-        var json = JSON.parse(data);
-
-        console.log(json.length);
-        console.log(json[0]["ip"]);
-
-        var len = json.length;
-        var jsonSize = Object.keys(json[0]).length;
-
-        var thead = document.createElement('thead');
-        document.getElementById("Table").appendChild(thead);
-
-        var row = document.createElement('tr');
-        thead.appendChild(row);
-
-        for(var j in json[0]){
-
-            if(j!="_id" && j!="__v"){
-                var col = document.createElement('th');
-                col.textContent = j;
-                row.appendChild(col);
-
-            }
-        }
-
-        var tbody = document.createElement('tbody');
-        document.getElementById("Table").appendChild(tbody);
-
-        for( var i=0; i< len ; i++){
-
-            var rows = document.createElement('tr');
-            tbody.appendChild(rows);
-
-            for(var j in json[i]){
-                if(j!="_id" && j!="__v"){
-                    var cols = document.createElement('td');
-                    cols.textContent = json[i][j] ;
-                    rows.appendChild(cols);
-                }
-            }
-            var div = document.createElement('div');
-            div.setAttribute('class',"drop_session");
-            div.setAttribute('value',json[i]["_id"]);
-            div.setAttribute('style',"margin-top: 15px");
-            rows.appendChild(div);
-            var itag = document.createElement('i');
-            itag.setAttribute('class','fa fa-trash');
-            itag.setAttribute('aria-hidden','true');
-            itag.setAttribute('style','font-size: 20px');
-            div.appendChild(itag);
-        }
-    }
-
-    $('#users').click(function () {
-        $.get("/getUsers",function (data) {
-            if(data == " DB Error in finding User "){
-                alert(data);
-            }
-            else if(data == " NO USERS "){
-                alert(data);
-            }else{
-                $('#Table').empty();
-                make_usersTable(data);
-            }
-
-        });
-    });
-
-    function make_usersTable(data) {
-        // parse the incoming data
-        var obj = JSON.stringify(data);
-        console.log(data);
-        var json = JSON.parse(data);
-
-        var len = json.length;
-        //var jsonSize = Object.keys(json[0]).length;
-        console.log(json);
-
-        //adding <thead> tag for table headings
-        var thead = document.createElement('thead');
-        document.getElementById("Table").appendChild(thead);
+    <div class="modal-footer">
+        <input type="submit" class="modal-action modal-close waves-effect waves-green btn-flat" value="Add Category" onclick="AddCategory_btn_click()">
+    </div>
+</div>
 
 
-        var row = document.createElement('tr');
-        thead.appendChild(row);
 
-        // adding heading text of table i.e., name of headings in table
-        for(var j in json[0]){
 
-            if(j!="_id" && j!="__v"){
-                var col = document.createElement('th');
-                col.textContent = j;
-                row.appendChild(col);
-            }
-        }
+<!-- Add Weblists Structure -->
+<div id="addWeblists" class="modal bottom-sheet">
 
-        var tbody = document.createElement('tbody');
-        document.getElementById("Table").appendChild(tbody);
+    <form class="modal-content row" id="addWeblistsForm">
 
-        //
-        for( var i=0; i< len ; i++){
+        <div class="input-field col s4">
+            <input id="listName" type="text" name="listName" class="validate">
+            <label for="listName">List name</label>
+        </div>
+        <div class="input-field col s4">
+            <input id="blackList" type="text" name="blackList" class="validate">
+            <label for="blackList">Black List array("," separated)</label>
+        </div>
 
-            var rows = document.createElement('tr');
-            rows.setAttribute("id","row_"+json[i]["_id"]);
-            tbody.appendChild(rows);
 
-            for(var j in json[i]){
-                if(j!="_id" && j!="__v"){
-                    var cols = document.createElement('td');
-                    cols.textContent = json[i][j] ;
-                    rows.appendChild(cols);
-                }
-            }
+    </form>
 
-            var div = document.createElement('div');
-            div.setAttribute('class',"user_details");
-            div.setAttribute('value',json[i]["_id"]);
-            div.setAttribute('style',"margin-top: 15px");
-            rows.appendChild(div);
+    <div class="modal-footer">
+        <input type="submit" class="modal-action modal-close waves-effect waves-green btn-flat" value="Add Weblist" onclick="AddWeblists_btn_click()">
+    </div>
+</div>
 
-            var edit = document.createElement('i');
-            edit.setAttribute('class','fa fa-pencil');
-            edit.setAttribute('aria-hidden','true');
-            edit.setAttribute('id','edit_'+json[i]["_id"]);
-            edit.setAttribute('onclick','edit_user('+JSON.stringify(json[i])+')');
-            edit.setAttribute('style','font-size: 20px');
-            div.appendChild(edit);
 
-            var save = document.createElement('i');
-            save.setAttribute('class','fa fa-floppy-o');
-            save.setAttribute('aria-hidden','true');
-            save.setAttribute('id','save_'+json[i]["_id"]);
-            save.setAttribute('style','font-size: 20px; display: none ');
-            div.appendChild(save);
-
-            var del = document.createElement('i');
-            del.setAttribute('class','fa fa-trash');
-            del.setAttribute('aria-hidden','true');
-            del.setAttribute('value',json[i]["_id"]);
-            del.setAttribute('onclick','delete_user(this)');
-            del.setAttribute('style',"font-size: 20px; padding-left: 10px");
-            div.appendChild(del);
-        }
-    }
-
-    function edit_user(obj) {
-        console.log(obj);
-
-        var objArray = [];
-
-        for(var j in obj){
-            if(j!="_id" && j!="__v")
-                objArray.push(j);
-        }
-
-        globalObj = objArray;
-
-        console.log(globalObj);
-
-        console.log("row id: row"+obj["_id"]);
-        var row = document.getElementById("row_"+obj["_id"]);
-        console.log(row);
-        var htmlText = "";
-        //htmlText += '<form action="/editUser?user='+obj["_id"]+'" method="get">';
-
-        console.log(objArray.length);
-        for( var i =0 ;i<objArray.length; i++){
-            if(objArray[i]=="password"){
-                htmlText+= '<td><input type="password" name='+objArray[i]+' value='+obj[objArray[i]]+'></td>';
-            }
-            else if(objArray[i] == "ctTime"){
-                htmlText+= '<td><input type="text" name='+objArray[i]+' value='+obj[objArray[i]]+' disabled ></td> ';
-            }
-            else{
-                htmlText+= '<td><input type="text" name='+objArray[i]+' value='+obj[objArray[i]]+'></td>';
-            }
-        }
-        //htmlText+='<input type="submit" value="Submit"></form>';
-        console.log(htmlText);
-        row.innerHTML = htmlText;
-
-        var div = document.createElement('div');
-        div.setAttribute('class',"user_details");
-        div.setAttribute('value',obj["_id"]);
-        div.setAttribute('style',"margin-top: 15px");
-        row.appendChild(div);
-
-        var save = document.createElement('i');
-        save.setAttribute('class','fa fa-floppy-o');
-        save.setAttribute('aria-hidden','true');
-        save.setAttribute('id','save_'+obj["_id"]);
-        save.setAttribute('onclick','save_user(globalObj,"' + obj["_id"]+'")' );
-        save.setAttribute('style','font-size: 20px');
-        div.appendChild(save);
-
-        var del = document.createElement('i');
-        del.setAttribute('class','fa fa-trash');
-        del.setAttribute('aria-hidden','true');
-        del.setAttribute('value',obj["_id"]);
-        del.setAttribute('onclick','delete_user(this)');
-        del.setAttribute('style',"font-size: 20px; padding-left: 10px");
-        div.appendChild(del);
-    }
-
-    function save_user(objArray, id) {
-
-        console.log(objArray);
-        console.log(id);
-        var getQuery='';
-        for(var i=0; i<objArray.length; i++){
-            getQuery+="&"+objArray[i]+'='+document.getElementsByName(objArray[i])[0].value;
-        }
-
-        console.log(getQuery);
-
-        $.get("/saveUser?id="+id+getQuery,function (data) {
-            console.log("response: "+data);
-            if(data =="DB Error"){
-                alert(data);
-            }
-            else if(data == "User details updated but error in displaying"){
-                alert(data);
-            }
-            else{
-                $("#Table").empty();
-                make_usersTable(data);
-            }
-        })
-    }
-
-    function delete_user(val) {
-        val = $(val).attr('value');
-        $.get("/deleteUser?user="+val,function (data) {
-            if(data == " Error in deleting User "){
-                alert(data);
-            }else{
-                $("#row_"+val).remove();
-            }
-        });
-    }
-
-</script>
+<script src="js/admin_home.js"></script>
 
 
 </body>
